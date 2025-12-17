@@ -1,0 +1,133 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+struct Book {
+    string title;
+    string author;
+    string isbn;
+    bool available;
+};
+struct Borrower {
+    string name;
+    string bookISBN;
+    int daysBorrowed;
+};
+
+vector<Book> books;
+vector<Borrower> borrowers;
+void addBook() {
+    Book b;
+    cout << "Enter Title: ";
+    cin.ignore();
+    getline(cin, b.title);
+    cout << "Enter Author: ";
+    getline(cin, b.author);
+    cout << "Enter ISBN: ";
+    getline(cin, b.isbn);
+    b.available = true;
+    books.push_back(b);
+    cout << "Book added successfully!\n";
+}
+void displayBooks() {
+    if (books.empty()) {
+        cout << "No books available.\n";
+        return;
+    }
+    cout << "\nAvailable Books:\n";
+    for (int i = 0; i < books.size(); i++) {
+        cout << i + 1 << ". "
+             << books[i].title << " | "
+             << books[i].author << " | ISBN: "
+             << books[i].isbn << " | "
+             << (books[i].available ? "Available" : "Checked Out")
+             << endl;
+    }
+}
+void searchBook() {
+    string key;
+    cout << "Enter Title / Author / ISBN to search: ";
+    cin.ignore();
+    getline(cin, key);
+
+    bool found = false;
+    for (auto &b : books) {
+        if (b.title == key || b.author == key || b.isbn == key) {
+            cout << "Found: " << b.title << " by " << b.author
+                 << " (ISBN: " << b.isbn << ")\n";
+            found = true;
+        }
+    }
+    if (!found)
+        cout << "Book not found.\n";
+}
+void checkoutBook() {
+    string isbn, name;
+    cout << "Enter ISBN of book: ";
+    cin.ignore();
+    getline(cin, isbn);
+
+    for (auto &b : books) {
+        if (b.isbn == isbn && b.available) {
+            cout << "Enter Borrower Name: ";
+            getline(cin, name);
+            Borrower br;
+            br.name = name;
+            br.bookISBN = isbn;
+            br.daysBorrowed = 0;
+            borrowers.push_back(br);
+            b.available = false;
+            cout << "Book checked out successfully!\n";
+            return;
+        }
+    }
+    cout << "Book not available or ISBN incorrect.\n";
+}
+void returnBook() {
+    string isbn;
+    int days;
+    cout << "Enter ISBN of returning book: ";
+    cin.ignore();
+    getline(cin, isbn);
+    for (int i = 0; i < borrowers.size(); i++) {
+        if (borrowers[i].bookISBN == isbn) {
+            cout << "Enter number of days borrowed: ";
+            cin >> days;
+            int fine = 0;
+            if (days > 7)
+                fine = (days - 7) * 2;  // ₹2 per day fine
+            cout << "Book returned successfully.\n";
+            cout << "Fine: ₹" << fine << endl;
+            borrowers.erase(borrowers.begin() + i);
+            for (auto &b : books)
+                if (b.isbn == isbn)
+                    b.available = true;
+            return;
+        }
+    }
+    cout << "No record found for this book.\n";
+}
+int main() {
+    int choice;
+    do {
+        cout << "\n--- LIBRARY MANAGEMENT SYSTEM ---\n";
+        cout << "1. Add Book\n";
+        cout << "2. View Books\n";
+        cout << "3. Search Book\n";
+        cout << "4. Checkout Book\n";
+        cout << "5. Return Book\n";
+        cout << "6. Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+        switch (choice) {
+            case 1: addBook(); break;
+            case 2: displayBooks(); break;
+            case 3: searchBook(); break;
+            case 4: checkoutBook(); break;
+            case 5: returnBook(); break;
+            case 6: cout << "Exiting system...\n"; break;
+            default: cout << "Invalid choice!\n";
+        }
+    } while (choice != 6);
+    return 0;
+}
